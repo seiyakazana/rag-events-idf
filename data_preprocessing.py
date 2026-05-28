@@ -5,11 +5,11 @@ Step 1 of the RAG pipeline.
 
 Responsibilities
 ----------------
-1. Fetch public events from the OpenAgenda / OpenDataSoft API.
-2. Print a preview of the results (replaces the old fetch_events.py utility).
-3. Clean the raw records into a normalised DataFrame.
-4. Split each description into overlapping text chunks.
-5. Persist the chunks (without vectors) to CHUNKS_PATH (events_chunks.json).
+1. Fetch public events from the OpenAgenda / OpenDataSoft API
+   and print a preview of the results.
+2. Clean the raw records into a normalised DataFrame.
+3. Split each description into overlapping text chunks.
+4. Persist the chunks (without vectors) to CHUNKS_PATH (events_chunks.json).
 
 Output
 ------
@@ -40,14 +40,14 @@ load_dotenv()
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-API_URL       = os.environ.get("API_URL",        "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/evenements-publics-openagenda/records/")
-API_LANG      = os.environ.get("API_LANG",       "fr")
-API_LIMIT     = int(os.environ.get("API_LIMIT",  100))
-API_REGION    = os.environ.get("API_REGION",     "Île-de-France")
-API_KEYWORDS  = os.environ.get("API_KEYWORDS",   "en physique")
-CHUNK_SIZE    = int(os.environ.get("CHUNK_SIZE",   500))
-CHUNK_OVERLAP = int(os.environ.get("CHUNK_OVERLAP", 50))
-CHUNKS_PATH   = os.environ.get("CHUNKS_PATH",    "events_chunks.json")
+API_URL       = os.environ["API_URL"]
+API_LANG      = os.environ["API_LANG"]
+API_LIMIT     = int(os.environ["API_LIMIT"])
+API_REGION    = os.environ["API_REGION"]
+API_KEYWORDS  = os.environ["API_KEYWORDS"]
+CHUNK_SIZE    = int(os.environ["CHUNK_SIZE"])
+CHUNK_OVERLAP = int(os.environ["CHUNK_OVERLAP"])
+CHUNKS_PATH   = os.environ["CHUNKS_PATH"]
 
 
 # ── Text chunking ─────────────────────────────────────────────────────────────
@@ -58,6 +58,8 @@ def chunk_text(
     chunk_overlap: int = CHUNK_OVERLAP,
 ) -> list[str]:
     """Split *text* into overlapping chunks, breaking on sentence or word boundaries."""
+    if chunk_overlap >= chunk_size:
+        raise ValueError(f"CHUNK_OVERLAP ({chunk_overlap}) must be < CHUNK_SIZE ({chunk_size})")
     if len(text) <= chunk_size:
         return [text]
     chunks: list[str] = []
@@ -85,7 +87,7 @@ def fetch_events() -> list[dict]:
     that started within the last 365 days.
     Returns the raw list of record dicts.
     """
-    today        = datetime.today()
+    today        = datetime.now()
     one_year_ago = (today - timedelta(days=365)).strftime("%Y-%m-%d")
     today_str    = today.strftime("%Y-%m-%d")
 
@@ -101,7 +103,7 @@ def fetch_events() -> list[dict]:
         ),
     }
 
-    response = requests.get(API_URL, params=params)
+    response = requests.get(API_URL, params=params, timeout=10)
     response.raise_for_status()
     return response.json().get("results", [])
 
@@ -116,9 +118,14 @@ def clean_events(records: list[dict]) -> pd.DataFrame:
     df = pd.DataFrame(records)
     df["title"]       = df["title_fr"].fillna("Sans titre")
     df["description"] = df["description_fr"].fillna(df["title"])
-    df["location"]    = df.get("location_name", pd.Series()).fillna("Inconnu")
+    df["location"]    = (
+        df["location_name"].fillna("Inconnu")
+        if "location_name" in df.columns
+        else "Inconnu"
+    )
     df["date_start"]  = pd.to_datetime(
-        df.get("firstdate_begin", pd.Series()), errors="coerce"
+        df["firstdate_begin"] if "firstdate_begin" in df.columns else None,
+        errors="coerce",
     )
     df = df[["title", "description", "location", "date_start"]].copy()
     return df.sort_values("date_start", ascending=False).reset_index(drop=True)
@@ -133,13 +140,13 @@ def build_chunks(df: pd.DataFrame) -> list[dict]:
     No vectors are attached at this stage.
     """
     chunks: list[dict] = []
-    for _, row in df.iterrows():
-        text_chunks = chunk_text(row["description"])
+    for row in df.to_dict("records"):
         date_ms = (
             int(row["date_start"].timestamp() * 1000)
             if pd.notna(row["date_start"])
             else None
         )
+        text_chunks = chunk_text(row["description"])
         for i, chunk in enumerate(text_chunks):
             chunks.append({
                 "title":       row["title"],
@@ -155,18 +162,17 @@ def build_chunks(df: pd.DataFrame) -> list[dict]:
 # ── Main pipeline ─────────────────────────────────────────────────────────────
 
 def main() -> None:
-    # Step 1 — fetch
+    # Step 1 — fetch + preview
     print("=== Step 1: Fetch events from API ===")
     records = fetch_events()
     if not records:
         print("No events found with these filters. Exiting.")
         return
 
-    # Preview (replaces the old fetch_events.py output)
     print(f"  {len(records)} event(s) found in the last 12 months.\n")
     for i, rec in enumerate(records, 1):
-        title     = rec.get("title_fr") or rec.get("title_en") or "No title"
-        location  = rec.get("location_name") or "Unknown location"
+        title      = rec.get("title_fr") or rec.get("title_en") or "No title"
+        location   = rec.get("location_name") or "Unknown location"
         date_start = rec.get("firstdate_begin") or "N/A"
         print(f"  {i:>3}. {title}")
         print(f"       Location : {location}")
