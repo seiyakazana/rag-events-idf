@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-05-28T20:59:53.743440",
+  "dataset_version": "1.0.0",
+  "total_cases": 3,
+  "results": [
+    {
+      "id": "tc_001",
+      "category": "entrepreneuriat",
+      "difficulty": "facile",
+      "question": "Je cherche des ateliers ou forums sur la création d'entreprise en Île-de-France.",
+      "response": "Voici les ateliers et forums sur la création d'entreprise en Île-de-France qui correspondent à votre demande :\n\n1. **Forum de la création d'entreprise**\n   - **Date** : 2 octobre 2025 à 14h00\n   - **Lieu** : Agence Sainte-Geneviève-des-Bois\n   - **Détail** : Rencontre avec des partenaires locaux pour échanger sur votre projet de création ou reprise d'entreprise.\n\n2. **M'IMAGINER CREATEUR D'ENTREPRISE** (deux sessions disponibles)\n   - **Date 1** : 4 septembre 2025 à 9h30\n   - **Date 2** : 2 octobre 2025 à 9h30\n   - **Lieu** : Agence Vitry-sur-Seine\n   - **Détail** : Atelier en co-animation avec l'ADIE pour identifier les enjeux de l'entrepreneuriat.\n\n3. **Forum de l'entrepreneuriat : venez échanger avec nos partenaires !**\n   - **Date** : 7 octobre 2025 à 13h30\n   - **Lieu** : Agence Épinay-sur-Seine\n   - **Détail** : Forum dédié à l'accompagnement des créateurs d'entreprise, avec plusieurs partenaires.\n\n4. **Une idée de création d'entreprise ? Informez-vous !**\n   - **Date** : 3 octobre 2025 à 9h15\n   - **Lieu** : Agence Avon\n   - **Détail** : Atelier pour découvrir les aides de France Travail et les accompagnements disponibles.\n\nN'hésitez pas si vous souhaitez des précisions sur l'un de ces événements !",
+      "latency_s": 16.02,
+      "rag_error": null,
+      "keyword_score": 75,
+      "must_hits": [
+        "création d'entreprise",
+        "atelier",
+        "Île-de-France"
+      ],
+      "must_misses": [
+        "Paris"
+      ],
+      "forbidden_hits": [],
+      "no_result_ok": null,
+      "keyword_pass": true
+    },
+    {
+      "id": "tc_005",
+      "category": "handicap_TH",
+      "difficulty": "facile",
+      "question": "Je suis en situation de handicap et je prépare un entretien d'embauche. Quels événements peuvent m'aider ?",
+      "response": "Voici les événements en Île-de-France qui peuvent vous aider à préparer votre entretien d'embauche en abordant spécifiquement la question du handicap :\n\n1. **Préparation au Job dating « spécial TH » pour la DDFIP – Auxiliaire bureautique H/F**\n   - **Date** : 15 septembre 2025 à 09h30\n   - **Lieu** : Agence Bobigny\n   - **Détail** : Cet atelier est réservé aux personnes en situation de handicap et vous aidera à travailler sur la présentation de votre parcours et la mise en valeur de vos compétences lors d’un entretien.\n\n2. **Atelier « Aborder sa situation de handicap en entretien d’embauche » (plusieurs dates)**\n   - **Dates et lieux** :\n     - 8 septembre 2025 à 14h00 (Agence Juvisy-sur-Orge)\n     - 6 octobre 2025 à 14h00 (Agence Juvisy-sur-Orge)\n     - 17 novembre 2025 à 13h00 (Agence Juvisy-sur-Orge)\n     - 15 décembre 2025 à 13h00 (Agence Juvisy-sur-Orge)\n   - **Détail** : Ces ateliers vous donneront des conseils pour aborder sereinement votre situation de handicap lors d’un entretien.\n\nCes événements sont conçus pour vous accompagner dans votre recherche d’emploi en tenant compte de vos besoins spécifiques. Bonne préparation !",
+      "latency_s": 33.82,
+      "rag_error": null,
+      "keyword_score": 100,
+      "must_hits": [
+        "handicap",
+        "entretien"
+      ],
+      "must_misses": [],
+      "forbidden_hits": [],
+      "no_result_ok": null,
+      "keyword_pass": true
+    },
+    {
+      "id": "tc_018",
+      "category": "hors_perimetre",
+      "difficulty": "facile",
+      "question": "Y a-t-il des cours de cuisine ou des ateliers gastronomiques en Île-de-France ?",
+      "response": "D'après les événements pertinents extraits, **aucun ne propose spécifiquement des cours de cuisine ou des ateliers gastronomiques** en Île-de-France.\n\nCependant, l'**Événement 5** pourrait vous intéresser si vous souhaitez travailler dans le secteur de la restauration :\n- **Titre** : *FORUM HÔTELLERIE RESTAURATION*\n- **Date** : 30 septembre 2025 à 09h15\n- **Lieu** : Agence Paris 15ème Brancion (Mairie du 15ème)\n- **Détail** : Recrutement dans les métiers de la restauration et de l'hôtellerie avec des entreprises comme Sodexo, Mama Shelter, etc.\n\nSi vous cherchez des ateliers culinaires grand public, je vous conseille de consulter des plateformes comme **La Fourchette**, **Meetup** ou les programmes des **mairies locales** (ex : ateliers des écoles hôtelières ou associations). Souhaitez-vous des suggestions en dehors des événements France Travail ?",
+      "latency_s": 4.17,
+      "rag_error": null,
+      "keyword_score": 10,
+      "must_hits": [],
+      "must_misses": [],
+      "forbidden_hits": [
+        "FORUM HOTELLERIE RESTAURATION",
+        "SODEXO",
+        "restauration"
+      ],
+      "no_result_ok": false,
+      "keyword_pass": false
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-05-28T21:17:34.123282",
+  "dataset_version": "1.0.0",
+  "total_cases": 3,
+  "results": [
+    {
+      "id": "tc_001",
+      "category": "entrepreneuriat",
+      "difficulty": "facile",
+      "question": "Je cherche des ateliers ou forums sur la création d'entreprise en Île-de-France.",
+      "response": "Voici les événements pertinents sur la création d'entreprise en Île-de-France, basés sur les extraits fournis :\n\n1. **Une idée de création d'entreprise ? Informez vous !**\n   - **Date** : 3 octobre 2025 à 09h15\n   - **Lieu** : Agence Avon\n\n2. **Forum de la création d'entreprise**\n   - **Date** : 2 octobre 2025 à 14h00\n   - **Lieu** : Agence Sainte-Geneviève-des-Bois\n\n3. **M'IMAGINER CREATEUR D'ENTREPRISE** (2 sessions)\n   - **Dates** :\n     - 4 septembre 2025 à 09h30\n     - 2 octobre 2025 à 09h30\n   - **Lieu** : Agence Vitry-sur-Seine\n\n4. **Forum de l'entrepreneuriat : venez échanger avec nos partenaires !**\n   - **Date** : 7 octobre 2025 à 13h30\n   - **Lieu** : Agence Épinay-sur-Seine",
+      "latency_s": 4.23,
+      "rag_error": null,
+      "keyword_score": 50,
+      "must_hits": [
+        "création d'entreprise",
+        "Île-de-France"
+      ],
+      "must_misses": [
+        "atelier",
+        "Paris"
+      ],
+      "forbidden_hits": [],
+      "no_result_ok": null,
+      "keyword_pass": false
+    },
+    {
+      "id": "tc_012",
+      "category": "recrutement",
+      "difficulty": "facile",
+      "question": "Y a-t-il des recrutements dans l'hôtellerie ou la restauration en Île-de-France ?",
+      "response": "Voici un événement correspondant à votre demande :\n\n- **Titre** : FORUM HOTELLERIE RESTAURATION\n  **Date** : 30 septembre 2025 à 09h15\n  **Lieu** : Agence Paris 15ème Brancion (Mairie du 15ème)",
+      "latency_s": 7.01,
+      "rag_error": null,
+      "keyword_score": 100,
+      "must_hits": [
+        "hôtellerie",
+        "restauration"
+      ],
+      "must_misses": [],
+      "forbidden_hits": [],
+      "no_result_ok": null,
+      "keyword_pass": true
+    },
+    {
+      "id": "tc_018",
+      "category": "hors_perimetre",
+      "difficulty": "facile",
+      "question": "Y a-t-il des cours de cuisine ou des ateliers gastronomiques en Île-de-France ?",
+      "response": "La base de données ne contient pas d'événement correspondant à des cours de cuisine ou des ateliers gastronomiques en Île-de-France.",
+      "latency_s": 0.84,
+      "rag_error": null,
+      "keyword_score": 100,
+      "must_hits": [],
+      "must_misses": [],
+      "forbidden_hits": [],
+      "no_result_ok": true,
+      "keyword_pass": true
+    }
+  ]
+}

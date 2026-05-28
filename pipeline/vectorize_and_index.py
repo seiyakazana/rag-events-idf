@@ -24,18 +24,22 @@ Output
 
 Previous step
 -------------
-    python data_preprocessing.py
+    python pipeline/data_preprocessing.py
 """
 
 import datetime
 import json
 import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from mistralai.client import Mistral
 
-from vector_store import FAISSVectorStore
+from app.vector_store import FAISSVectorStore
 
 load_dotenv()
 
@@ -63,16 +67,12 @@ def load_chunks(chunks_path: str = CHUNKS_PATH) -> list[dict]:
         return json.load(f)
 
 
-def embed_chunks(chunks: list[dict], client: Mistral) -> list[dict]:
-    """
-    Call the Mistral embedding API for every chunk and attach the resulting
-    vector under the 'vector' key.  Returns the same list, mutated in-place.
-    """
+def embed_chunks(chunks: list[dict], client: Mistral) -> None:
+    """Embed each chunk with Mistral and attach the vector under the 'vector' key."""
     texts = [c["description"] for c in chunks]
     resp  = client.embeddings.create(model=EMBEDDING_MODEL, inputs=texts)
     for i, item in enumerate(resp.data):
         chunks[i]["vector"] = item.embedding
-    return chunks
 
 
 def save_vectorized(chunks: list[dict], json_path: str = JSON_PATH) -> None:
@@ -81,21 +81,14 @@ def save_vectorized(chunks: list[dict], json_path: str = JSON_PATH) -> None:
         json.dump(chunks, f, ensure_ascii=False, indent=2)
 
 
-def load_events(
-    json_path: str = JSON_PATH,
+def chunks_to_documents(
+    chunks: list[dict],
 ) -> tuple[list[Document], list[list[float]]]:
-    """
-    Read the vectorised JSON and return a pair:
-        (list[LangChain Document], list[embedding vectors])
-    One Document per chunk; the vector is separated out for FAISS ingestion.
-    """
-    with open(json_path, encoding="utf-8") as f:
-        data = json.load(f)
-
+    """Convert chunk dicts to (LangChain Documents, embedding vectors)."""
     docs: list[Document]       = []
     vectors: list[list[float]] = []
 
-    for chunk in data:
+    for chunk in chunks:
         date_ms  = chunk.get("date_start")
         date_str = (
             datetime.datetime.fromtimestamp(date_ms / 1000).strftime("%Y-%m-%d %H:%M")
@@ -116,6 +109,14 @@ def load_events(
         vectors.append(chunk["vector"])
 
     return docs, vectors
+
+
+def load_events(
+    json_path: str = JSON_PATH,
+) -> tuple[list[Document], list[list[float]]]:
+    """Read the vectorised JSON from disk and return (Documents, vectors)."""
+    with open(json_path, encoding="utf-8") as f:
+        return chunks_to_documents(json.load(f))
 
 
 def build_index(
@@ -155,11 +156,8 @@ def main() -> None:
 
     # Step 2 — embed
     print("\n=== Step 2: Embed chunks with Mistral ===")
-    chunks = embed_chunks(chunks, client)
-    print("  Embedding complete:")
-    for c in chunks:
-        print(f"    [{c['chunk_index'] + 1}/{c['chunk_count']}] {c['title']}")
-        print(f"      dim={len(c['vector'])}, first values={c['vector'][:4]}")
+    embed_chunks(chunks, client)
+    print(f"  Embedding complete: {len(chunks)} chunk(s).")
 
     # Step 3 — save vectorised JSON
     print(f"\n=== Step 3: Save vectorised chunks to '{JSON_PATH}' ===")
@@ -168,9 +166,9 @@ def main() -> None:
 
     # Step 4 — build FAISS index
     print("\n=== Step 4: Build FAISS index ===")
-    docs, vectors = load_events(JSON_PATH)
+    docs, vectors = chunks_to_documents(chunks)
     store = build_index(docs, vectors, client)
-    print(f"  Vectors in index: {store._index.ntotal}")
+    print(f"  Vectors in index: {len(store)}")
 
     # Step 5 — test queries
     print("\n=== Step 5: Test queries ===")
@@ -179,13 +177,13 @@ def main() -> None:
     # Step 6 — round-trip verification
     print("\n=== Step 6: Round-trip verification ===")
     store2  = FAISSVectorStore.load_local(INDEX_DIR, client=client)
-    print(f"  Reloaded index: {store2._index.ntotal} vectors")
+    print(f"  Reloaded index: {len(store2)} vectors")
     results = store2.similarity_search("creation d'entreprise", k=2)
     print(f"  Round-trip query returned {len(results)} result(s):")
     for doc in results:
         print(f"    - {doc.metadata['title']!r}")
 
-    print("\nDone. Run 'streamlit run chatbot.py' to launch the assistant.")
+    print("\nDone. Run 'streamlit run chatbot.py' from the project root to launch the assistant.")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,388 @@
+{
+  "metadata": {
+    "version": "1.1.0",
+    "created": "2026-05-28",
+    "description": "Jeu de données de test annoté (question-réponse) pour évaluer la qualité du pipeline RAG. Les événements de référence sont issus du jeu de données events_vectorized.json (100 événements, périmètre Île-de-France, source France Travail).",
+    "total_cases": 20,
+    "categories": ["entrepreneuriat", "handicap_TH", "sante", "jeunes", "recrutement", "geographique", "cadres", "hors_perimetre"],
+    "answer_types": ["event_list", "single_event", "no_result", "clarification"],
+    "difficulty_levels": ["facile", "moyen", "difficile"],
+    "evaluation_fields": {
+      "must_mention": "Termes ou faits qui DOIVENT apparaître dans une réponse correcte (vérification automatisable par regex/keywords).",
+      "should_mention": "Termes souhaitables mais non obligatoires (réponse incomplète mais non incorrecte si absents).",
+      "must_not_mention": "Termes ne devant PAS apparaître (indicateurs d'hallucination ou de confusion sémantique).",
+      "evaluation_criteria": "Guide de notation en prose pour les annotateurs humains (ou LLM-as-judge).",
+      "reference_events": "Titres d'événements attendus dans le contexte récupéré par le retriever."
+    }
+  },
+  "test_cases": [
+    {
+      "id": "tc_001",
+      "category": "entrepreneuriat",
+      "difficulty": "facile",
+      "question": "Je cherche des ateliers ou forums sur la création d'entreprise en Île-de-France.",
+      "reference_events": [
+        "Atelier Création d'entreprise",
+        "Forum de la création d'entreprise",
+        "M'IMAGINER CREATEUR D'ENTREPRISE",
+        "Forum Entreprendre",
+        "France Travail et la création d'entreprise : L'essentiel à savoir !"
+      ],
+      "expected_elements": {
+        "must_mention": ["création d'entreprise"],
+        "should_mention": ["atelier", "forum", "Vitry", "Sainte-Geneviève", "Paris", "Avon"],
+        "must_not_mention": ["cours de cuisine", "événement sportif"]
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit citer au moins 2 événements distincts liés à la création d'entreprise, avec leur titre, lieu et date. La présence du terme 'création d'entreprise' est obligatoire. Aucune fabrication de détails absents du contexte.",
+      "notes": "Test de base : requête générique sur un thème très représenté dans le dataset. Les mots-clés géographiques (Paris, Avon, etc.) sont dans 'should_mention' car le retriever peut varier dans ses résultats."
+    },
+    {
+      "id": "tc_002",
+      "category": "entrepreneuriat",
+      "difficulty": "moyen",
+      "question": "Comment financer mon projet de création d'entreprise ? Y a-t-il des événements sur ce sujet ?",
+      "reference_events": [
+        "KIOSQUE FINANCEMENT AVEC L'ADIE",
+        "Création d'entreprise : ADIE et INITIACTIVE 95-78",
+        "Les accompagnements et les aides financières à la Création d'entreprise de France Travail"
+      ],
+      "expected_elements": {
+        "must_mention": ["ADIE", "financement", "aide"],
+        "should_mention": ["Stains", "Saint-Ouen", "Paris 16", "France Travail"],
+        "must_not_mention": ["banque commerciale", "prêt immobilier"]
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit mentionner au moins un événement traitant du financement ou des aides à la création d'entreprise, avec le nom ADIE ou 'aides financières'. Elle ne doit pas confondre ces événements avec des ateliers généraux sur la création d'entreprise.",
+      "notes": "Test de précision thématique : sous-thème financement au sein de l'entrepreneuriat."
+    },
+    {
+      "id": "tc_003",
+      "category": "entrepreneuriat",
+      "difficulty": "moyen",
+      "question": "Je veux comprendre les différents statuts juridiques pour lancer mon activité. Quels événements me concernent ?",
+      "reference_events": [
+        "La mise en perspective de l'ensemble des statuts juridiques d'une entreprise avec NUMBR",
+        "La Micro-entreprise",
+        "Quel statut juridique choisir pour lancer votre activité ?",
+        "Les conseils juridiques des Avocats du Barreau de Paris"
+      ],
+      "expected_elements": {
+        "must_mention": ["statut", "juridique"],
+        "should_mention": ["micro-entreprise", "Paris 16", "Paris 7", "avocat", "NUMBR"],
+        "must_not_mention": ["SAMSIC", "recrutement logistique", "hôtellerie"]
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit citer au moins un événement sur les statuts juridiques ou la micro-entreprise. Les événements sur l'hôtellerie ou le recrutement sectoriel ne sont pas pertinents et leur présence est pénalisante.",
+      "notes": "Test de discrimination sémantique : statuts juridiques vs. création d'entreprise générique."
+    },
+    {
+      "id": "tc_004",
+      "category": "entrepreneuriat",
+      "difficulty": "difficile",
+      "question": "Y a-t-il un événement qui aide à construire un business plan ?",
+      "reference_events": [
+        "Construire son Business Plan et faire son étude de marché",
+        "Business Plan et Création d'entreprise"
+      ],
+      "expected_elements": {
+        "must_mention": ["business plan", "Paris"],
+        "should_mention": ["étude de marché", "Paris 7", "Paris 16"],
+        "must_not_mention": []
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit identifier les événements portant explicitement sur le business plan. L'usage du terme exact 'business plan' dans la réponse est requis. Réponse idéale : 2 événements distincts avec lieux et dates.",
+      "notes": "Test de correspondance lexicale directe (terme anglais 'business plan' présent dans les titres)."
+    },
+    {
+      "id": "tc_005",
+      "category": "handicap_TH",
+      "difficulty": "facile",
+      "question": "Je suis en situation de handicap et je prépare un entretien d'embauche. Quels événements peuvent m'aider ?",
+      "reference_events": [
+        "ATELIER ABORDER SA SITUATION DE HANDICAP EN ENTRETIEN D'EMBAUCHE FRANCE TRAVAIL JUVISY",
+        "ATELIER PREPARATION A L'ENTRETIEN D'EMBAUCHE UNIQUEMENT POUR LES TH",
+        "Préparation au Job dating « spécial TH » pour la DDFIP – Auxiliaire bureautique H/F"
+      ],
+      "expected_elements": {
+        "must_mention": ["handicap", "entretien"],
+        "should_mention": ["Juvisy", "Bobigny", "TH"],
+        "must_not_mention": ["VTC", "hôtellerie", "cariste"]
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit impérativement citer au moins un atelier spécifiquement dédié aux personnes en situation de handicap (TH) et à la préparation d'entretien. L'agence de Juvisy-sur-Orge doit être mentionnée.",
+      "notes": "Test de population spécifique : TH = Travailleurs Handicapés."
+    },
+    {
+      "id": "tc_006",
+      "category": "handicap_TH",
+      "difficulty": "moyen",
+      "question": "Quels sont tous les événements réservés ou adaptés aux personnes en situation de handicap ?",
+      "reference_events": [
+        "ATELIER ABORDER SA SITUATION DE HANDICAP EN ENTRETIEN D'EMBAUCHE FRANCE TRAVAIL JUVISY",
+        "ATELIER PREPARATION A L'ENTRETIEN D'EMBAUCHE UNIQUEMENT POUR LES TH",
+        "Préparation au Job dating « spécial TH » pour la DDFIP – Auxiliaire bureautique H/F",
+        "Réunion d'information collection Présentation pré-formation OASISS Métiers du social et du soin"
+      ],
+      "expected_elements": {
+        "must_mention": ["handicap"],
+        "should_mention": ["Juvisy", "Bobigny", "TH", "OASISS", "Rambouillet"],
+        "must_not_mention": []
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "Réponse exhaustive attendue : au moins 3 événements liés au handicap. Le dispositif OASISS de Rambouillet est un résultat pertinent mais moins évident (test de rappel). Pénalité si seulement 1 événement est cité.",
+      "notes": "Test de rappel (recall) : combien d'événements pertinents le système retrouve-t-il ?"
+    },
+    {
+      "id": "tc_007",
+      "category": "handicap_TH",
+      "difficulty": "difficile",
+      "question": "Y a-t-il des ateliers pour les travailleurs handicapés à Juvisy-sur-Orge ?",
+      "reference_events": [
+        "ATELIER ABORDER SA SITUATION DE HANDICAP EN ENTRETIEN D'EMBAUCHE FRANCE TRAVAIL JUVISY",
+        "ATELIER PREPARATION A L'ENTRETIEN D'EMBAUCHE UNIQUEMENT POUR LES TH"
+      ],
+      "expected_elements": {
+        "must_mention": ["Juvisy", "handicap"],
+        "should_mention": ["entretien", "TH"],
+        "must_not_mention": ["Bobigny", "Rambouillet", "Stains"]
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit citer les deux ateliers de Juvisy dédiés aux TH. Elle ne doit pas citer d'événements situés dans d'autres villes comme réponse principale à une question géolocalisée.",
+      "notes": "Test de filtrage géographique combiné à un filtre thématique."
+    },
+    {
+      "id": "tc_008",
+      "category": "sante",
+      "difficulty": "facile",
+      "question": "Je souhaite me reconvertir dans le secteur de la santé. Y a-t-il des événements sur ce thème ?",
+      "reference_events": [
+        "Détection de potentiels métiers du secteur de la santé",
+        "Reconversion professionnelle et santé"
+      ],
+      "expected_elements": {
+        "must_mention": ["santé", "reconversion"],
+        "should_mention": ["Livry-Gargan", "Bondy"],
+        "must_not_mention": ["hôtellerie", "entrepreneuriat", "logistique"]
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit citer les deux événements spécifiquement dédiés au secteur de la santé et à la reconversion. Les événements sans lien avec la santé ne doivent pas figurer.",
+      "notes": "Test de secteur professionnel : santé/soin."
+    },
+    {
+      "id": "tc_009",
+      "category": "sante",
+      "difficulty": "moyen",
+      "question": "Quels événements portent sur les métiers du soin ou du social ?",
+      "reference_events": [
+        "Réunion d'information collection Présentation pré-formation OASISS Métiers du social et du soin",
+        "Reconversion professionnelle et santé",
+        "Détection de potentiels métiers du secteur de la santé"
+      ],
+      "expected_elements": {
+        "must_mention": ["soin", "social"],
+        "should_mention": ["OASISS", "Rambouillet", "Bondy", "Livry-Gargan"],
+        "must_not_mention": []
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit mentionner le dispositif OASISS (métiers du social et du soin) comme résultat pertinent, en plus des événements de reconversion santé. Pénalité si OASISS est absent alors qu'il correspond exactement à la requête.",
+      "notes": "Test de synonymie : 'soin' ↔ 'santé', 'social' comme dimension métier."
+    },
+    {
+      "id": "tc_010",
+      "category": "jeunes",
+      "difficulty": "facile",
+      "question": "Je suis jeune et je cherche un emploi. Quels dispositifs ou événements existent pour moi ?",
+      "reference_events": [
+        "Information collective sur le dispositif \"Accompagnement Individualisé des Jeunes (AIJ)\"",
+        "Mentorat DUO FOR A JOB à destination des jeunes (18-33 ans)",
+        "Trouve ton job à l'aide de ton mentor avec NQT !"
+      ],
+      "expected_elements": {
+        "must_mention": ["jeune"],
+        "should_mention": ["AIJ", "DUO FOR A JOB", "NQT", "Saint-Denis", "Paris 12", "Paris 20"],
+        "must_not_mention": []
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit identifier au moins deux dispositifs ciblant les jeunes demandeurs d'emploi. Le programme AIJ (Accompagnement Individualisé des Jeunes) doit être mentionné. Les programmes de mentorat (DUO FOR A JOB, NQT) constituent des résultats excellents.",
+      "notes": "Test de cible de public : jeunes demandeurs d'emploi."
+    },
+    {
+      "id": "tc_011",
+      "category": "jeunes",
+      "difficulty": "moyen",
+      "question": "Qu'est-ce que le dispositif AIJ et comment y accéder ?",
+      "reference_events": [
+        "Information collective sur le dispositif \"Accompagnement Individualisé des Jeunes (AIJ)\""
+      ],
+      "expected_elements": {
+        "must_mention": ["AIJ", "Accompagnement Individualisé des Jeunes"],
+        "should_mention": ["Saint-Denis", "18", "25 ans", "spectacle", "audiovisuel"],
+        "must_not_mention": []
+      },
+      "answer_type": "single_event",
+      "evaluation_criteria": "La réponse doit expliquer que l'AIJ est un dispositif d'accompagnement pour les jeunes (18-25 ans), mentionner l'agence de Saint-Denis, et idéalement préciser le secteur ciblé (spectacle/audiovisuel d'après la description de l'événement). Si le système ne dispose pas de plus d'informations, il doit l'indiquer clairement.",
+      "notes": "Test de question factuelle sur un dispositif spécifique."
+    },
+    {
+      "id": "tc_012",
+      "category": "recrutement",
+      "difficulty": "facile",
+      "question": "Y a-t-il des recrutements dans l'hôtellerie ou la restauration en Île-de-France ?",
+      "reference_events": [
+        "FORUM HOTELLERIE RESTAURATION"
+      ],
+      "expected_elements": {
+        "must_mention": ["hôtellerie", "restauration"],
+        "should_mention": ["Paris 15", "Brancion", "SODEXO", "MAMA SHELTER"],
+        "must_not_mention": ["Vitry", "Juvisy", "handicap"]
+      },
+      "answer_type": "single_event",
+      "evaluation_criteria": "La réponse doit identifier le forum dédié à l'hôtellerie-restauration organisé par France Travail Brancion (Paris 15). Elle doit mentionner au moins le lieu (Paris 15ème). La présence d'employeurs comme SODEXO constitue un excellent niveau de détail.",
+      "notes": "Test de secteur professionnel : hôtellerie-restauration. Un seul événement dans le dataset."
+    },
+    {
+      "id": "tc_013",
+      "category": "recrutement",
+      "difficulty": "moyen",
+      "question": "Je cherche un emploi dans la logistique ou en entrepôt. Des recrutements sont-ils organisés ?",
+      "reference_events": [
+        "Recrutement de caristes (H/F)-logistique import-export",
+        "Recrutement agent(e)s logistiques avec CACES 1-3-5",
+        "Recrutement Préparateur Commande et Cariste Adequat"
+      ],
+      "expected_elements": {
+        "must_mention": ["logistique", "cariste"],
+        "should_mention": ["Roissy", "Gonesse", "Savigny", "CACES"],
+        "must_not_mention": []
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit mentionner au moins deux événements de recrutement dans la logistique/manutention. La mention des habilitations CACES ou du site de Roissy CDG constitue un bon niveau de précision.",
+      "notes": "Test de secteur professionnel : logistique/entrepôt. Trois événements pertinents dans le dataset."
+    },
+    {
+      "id": "tc_014",
+      "category": "geographique",
+      "difficulty": "moyen",
+      "question": "Quels sont les événements disponibles à Versailles ?",
+      "reference_events": [
+        "Le savoir être, entrez dans le \"je\" [Beta Test V2.2]"
+      ],
+      "expected_elements": {
+        "must_mention": ["Versailles"],
+        "should_mention": ["savoir-être", "savoir être"],
+        "must_not_mention": []
+      },
+      "answer_type": "single_event",
+      "evaluation_criteria": "La réponse doit identifier le seul événement localisé à Versailles dans le dataset. Si le système est robuste, il doit indiquer qu'il n'y a qu'un seul événement disponible à Versailles. Une réponse listant des événements dans d'autres villes serait incorrecte.",
+      "notes": "Test de précision géographique : seul 1 événement à Versailles dans le dataset."
+    },
+    {
+      "id": "tc_015",
+      "category": "geographique",
+      "difficulty": "moyen",
+      "question": "Quels événements ont lieu dans le nord de la Seine-Saint-Denis (Stains, Saint-Denis, Bobigny) ?",
+      "reference_events": [
+        "Permanence Cités-Lab pour les porteurs de projet et créateurs d'entreprise résidants en QPV",
+        "KIOSQUE FINANCEMENT AVEC L'ADIE",
+        "Information collective sur le dispositif \"Accompagnement Individualisé des Jeunes (AIJ)\"",
+        "En parler, c'est avancer. Jeu.",
+        "Préparation au Job dating « spécial TH » pour la DDFIP – Auxiliaire bureautique H/F"
+      ],
+      "expected_elements": {
+        "must_mention": ["Seine-Saint-Denis", "Stains", "Saint-Denis", "Bobigny"],
+        "should_mention": ["Cités-Lab", "ADIE", "AIJ", "TH"],
+        "must_not_mention": ["Versailles", "Juvisy"]
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit citer des événements situés dans au moins deux des trois villes mentionnées (Stains, Saint-Denis, Bobigny). Les événements dans d'autres villes non mentionnées ne doivent pas être présentés comme étant dans la zone cible.",
+      "notes": "Test de filtrage géographique multi-villes dans un même département."
+    },
+    {
+      "id": "tc_016",
+      "category": "cadres",
+      "difficulty": "moyen",
+      "question": "Je suis cadre en recherche d'emploi depuis plus d'un an. Quelles solutions existent ?",
+      "reference_events": [
+        "AGIL'CADRES",
+        "NOUVEAUX HORIZONS (DISPOSITIF APEC)",
+        "CDME : Le Travail en Temps Partagé pour les cadres",
+        "Présentation NOUVEAUX HORIZONS prestation \"spécial cadres\" pour les personnes du sud 77"
+      ],
+      "expected_elements": {
+        "must_mention": ["cadre"],
+        "should_mention": ["AGIL'CADRES", "APEC", "NOUVEAUX HORIZONS", "Colombes", "Sartrouville", "Avon"],
+        "must_not_mention": []
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit identifier le dispositif AGIL'CADRES et/ou NOUVEAUX HORIZONS (APEC) comme solutions pertinentes pour les cadres. La mention de Colombes ou de l'APEC constitue un excellent indicateur de précision.",
+      "notes": "Test de cible de public : cadres en recherche d'emploi longue durée."
+    },
+    {
+      "id": "tc_017",
+      "category": "entrepreneuriat",
+      "difficulty": "difficile",
+      "question": "Je veux rencontrer d'autres entrepreneurs et échanger sur leurs parcours. Y a-t-il un événement pour ça ?",
+      "reference_events": [
+        "Paroles d'entrepreneurs",
+        "Forum Entreprendre",
+        "Forum de l'entrepreneuriat : venez échanger avec nos partenaires !"
+      ],
+      "expected_elements": {
+        "must_mention": ["entrepreneur"],
+        "should_mention": ["Paroles d'entrepreneurs", "Forum", "Paris 16", "Paris 17", "Épinay"],
+        "must_not_mention": []
+      },
+      "answer_type": "event_list",
+      "evaluation_criteria": "La réponse doit identifier des événements orientés networking/témoignages d'entrepreneurs (Paroles d'entrepreneurs, Forums). Un simple atelier méthodologique (ex. Business Plan) est moins pertinent. Priorité aux événements d'échange et de rencontre.",
+      "notes": "Test de nuance sémantique : 'rencontrer', 'échanger' vs. 'se former' en entrepreneuriat."
+    },
+    {
+      "id": "tc_018",
+      "category": "hors_perimetre",
+      "difficulty": "facile",
+      "question": "Y a-t-il des cours de cuisine ou des ateliers gastronomiques en Île-de-France ?",
+      "reference_events": [],
+      "expected_elements": {
+        "must_mention": [],
+        "should_mention": ["aucun événement", "ne correspond pas", "pas d'événement"],
+        "must_not_mention": ["FORUM HOTELLERIE RESTAURATION", "SODEXO", "restauration"]
+      },
+      "answer_type": "no_result",
+      "evaluation_criteria": "La réponse doit indiquer clairement qu'aucun événement correspondant n'est disponible dans la base de données. Elle ne doit PAS confondre des recrutements dans la restauration avec des cours de cuisine — ce serait une hallucination. Une explication que la base couvre l'emploi et la formation professionnelle (pas les loisirs) est un plus.",
+      "notes": "Test de hors-périmètre : loisirs vs. emploi/formation. Risque de confusion avec le forum restauration."
+    },
+    {
+      "id": "tc_019",
+      "category": "hors_perimetre",
+      "difficulty": "moyen",
+      "question": "Quels événements sportifs ou compétitions se déroulent en Île-de-France ?",
+      "reference_events": [],
+      "expected_elements": {
+        "must_mention": [],
+        "should_mention": ["aucun événement", "ne correspond pas"],
+        "must_not_mention": []
+      },
+      "answer_type": "no_result",
+      "evaluation_criteria": "La réponse doit indiquer clairement qu'aucun événement sportif n'est répertorié. Elle doit éviter de détourner des événements d'emploi en les présentant comme pertinents. Une réponse qui suggère de consulter d'autres sources est acceptée.",
+      "notes": "Test de hors-périmètre : événements sportifs hors du scope emploi/formation."
+    },
+    {
+      "id": "tc_020",
+      "category": "hors_perimetre",
+      "difficulty": "difficile",
+      "question": "Je cherche des concerts ou des spectacles culturels à voir en Île-de-France.",
+      "reference_events": [
+        "IDF - Place de l'Emploi - Métiers du Spectacle - 23 septembre"
+      ],
+      "expected_elements": {
+        "must_mention": [],
+        "should_mention": ["emploi", "métiers du spectacle", "pas de concert", "Emploi dans le spectacle"],
+        "must_not_mention": ["billet", "achat", "programmation", "scène"]
+      },
+      "answer_type": "clarification",
+      "evaluation_criteria": "Il existe un événement sur les 'Métiers du Spectacle' (emploi dans le secteur) mais ce n'est PAS un concert ni un spectacle à voir. La réponse idéale précise cette distinction et évite de présenter l'événement emploi comme une réponse à une recherche culturelle. Une bonne réponse recadre la question en expliquant que la base couvre l'emploi/formation, pas les événements culturels à public.",
+      "notes": "Test de nuance sémantique critique : 'spectacle' = emploi dans le spectacle ≠ spectacle grand public. Risque élevé de réponse trompeuse."
+    }
+  ]
+}

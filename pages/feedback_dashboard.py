@@ -3,28 +3,11 @@ Feedback Dashboard — page dédiée à l'analyse des retours utilisateurs.
 Accessible via le menu de navigation Streamlit (pages/).
 """
 
-import json
-from pathlib import Path
 from datetime import datetime
 
 import streamlit as st
 
-FEEDBACK_FILE = Path(__file__).parent.parent / "feedback.json"
-
-
-# ── Data helpers ──────────────────────────────────────────────────────────────
-
-def load_feedbacks() -> list[dict]:
-    if FEEDBACK_FILE.exists():
-        with open(FEEDBACK_FILE, encoding="utf-8") as f:
-            return json.load(f).get("feedbacks", [])
-    return []
-
-
-def delete_feedback(fb_id: str) -> None:
-    feedbacks = [f for f in load_feedbacks() if f["id"] != fb_id]
-    with open(FEEDBACK_FILE, "w", encoding="utf-8") as f:
-        json.dump({"feedbacks": feedbacks}, f, ensure_ascii=False, indent=2)
+from app.feedback import load_feedbacks, delete_feedback
 
 
 def export_csv(feedbacks: list[dict]) -> str:

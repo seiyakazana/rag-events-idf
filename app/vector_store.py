@@ -11,14 +11,12 @@ from pathlib import Path
 
 import faiss
 import numpy as np
-from dotenv import load_dotenv
 from langchain_core.documents import Document
 from mistralai.client import Mistral
 
-load_dotenv()
-
-EMBEDDING_DIM   = int(os.environ.get("EMBEDDING_DIM", 1024))
-EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "mistral-embed")
+EMBEDDING_DIM        = int(os.environ.get("EMBEDDING_DIM", 1024))
+EMBEDDING_MODEL      = os.environ.get("EMBEDDING_MODEL", "mistral-embed")
+RELEVANCE_THRESHOLD  = float(os.environ.get("RELEVANCE_THRESHOLD", 0.82))
 
 
 class FAISSVectorStore:
@@ -49,8 +47,11 @@ class FAISSVectorStore:
         return [
             (self._documents[idx], float(score))
             for idx, score in zip(I[0], D[0])
-            if idx != -1
+            if idx != -1 and float(score) >= RELEVANCE_THRESHOLD
         ]
+
+    def __len__(self) -> int:
+        return self._index.ntotal
 
     def save_local(self, folder: str) -> None:
         path = Path(folder)
